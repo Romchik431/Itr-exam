@@ -1,0 +1,57 @@
+name: Android checks
+on:
+  push:
+    paths: ['android/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Test learning and scoring
+        run: node android/tests/core.test.js
+      - name: Set up Android platform and build tools
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Verify installable package with synthetic test content
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          export EXAM_BANK="$RUNNER_TEMP/fixture.json" EXAM_KEYSTORE="$RUNNER_TEMP/ci.p12" EXAM_PASS_FILE="$RUNNER_TEMP/ci.pass"
+          trap 'rm -f "$EXAM_KEYSTORE" "$EXAM_PASS_FILE"' EXIT
+          node android/tests/core.test.js --fixture > "$EXAM_BANK"
+          openssl rand -hex 32 > "$EXAM_PASS_FILE"
+          keytool -genkeypair -storetype PKCS12 -keystore "$EXAM_KEYSTORE" -storepass:file "$EXAM_PASS_FILE" -alias exampro -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=Disposable CI test'
+          bash android/tools/build.sh "$RUNNER_TEMP/exampro-ci.apk"
+          unzip -tq "$RUNNER_TEMP/exampro-ci.apk"
+      - name: Build owner release in a private repository
+        if: github.event_name == 'workflow_dispatch' && github.event.repository.private == true
+        shell: bash
+        env:
+          SIGNER_P12: ${{ secrets.EXAMPRO_P12_BASE64 }}
+          SIGNER_PASSWORD: ${{ secrets.EXAMPRO_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          export EXAM_KEYSTORE="$RUNNER_TEMP/owner.p12" EXAM_PASS_FILE="$RUNNER_TEMP/owner.pass"
+          trap 'rm -f "$EXAM_KEYSTORE" "$EXAM_PASS_FILE"' EXIT
+          test -s android/assets/builtin.json
+          printf '%s' "$SIGNER_P12" | base64 -d > "$EXAM_KEYSTORE"
+          printf '%s' "$SIGNER_PASSWORD" > "$EXAM_PASS_FILE"
+          bash android/tools/build.sh "$RUNNER_TEMP/ExamPro.apk"
+      - name: Save private APK artifact
+        if: github.event_name == 'workflow_dispatch' && github.event.repository.private == true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ExamPro-release
+          path: ${{ runner.temp }}/ExamPro.apk
+          retention-days: 7
+          if-no-files-found: error
+

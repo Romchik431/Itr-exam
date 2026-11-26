@@ -1,0 +1,4 @@
+<resources><style name="ExamTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+    <item name="android:windowSplashScreenBackground">#144943</item><item name="android:windowSplashScreenAnimatedIcon">@drawable/launcher</item>
+    <item name="android:windowBackground">#144943</item><item name="android:statusBarColor">#144943</item><item name="android:navigationBarColor">#143E39</item>
+</style></resources>

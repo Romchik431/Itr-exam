@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="by.exampro.itr" android:versionCode="10000" android:versionName="1.0.0">
+    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="35"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <queries><intent><action android:name="android.intent.action.TTS_SERVICE"/></intent></queries>
+    <application android:label="Экзамен ПРО" android:icon="@drawable/launcher" android:theme="@style/ExamTheme"
+        android:allowBackup="false" android:usesCleartextTraffic="false" android:supportsRtl="true">
+        <activity android:name=".MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize" android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|uiMode|fontScale">
+            <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+        </activity>
+        <receiver android:name=".StudyReminder" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.TIME_SET"/>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

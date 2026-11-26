@@ -1,0 +1,10 @@
+assets/builtin.json
+build/
+*.p12
+*.jks
+*.pass
+*.apk
+*.idsig
+*.pdf
+__pycache__/
+

@@ -1,0 +1,5 @@
+<resources><style name="ExamTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+    <item name="android:fontFamily">sans</item><item name="android:colorAccent">#166457</item>
+    <item name="android:windowBackground">#144943</item><item name="android:statusBarColor">#144943</item>
+    <item name="android:navigationBarColor">#143E39</item><item name="android:windowLightStatusBar">false</item>
+</style></resources>
